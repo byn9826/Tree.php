@@ -10,6 +10,7 @@ class Router {
 	private $controller;
 	private $action;
 	private $type;
+	private $location;
      
 	private function __construct() {}
      
@@ -54,6 +55,7 @@ class Router {
 			$this->pageNotFound($response);
 			return;
 		}
+		$this->location = [$this->module, $this->controller, $this->action];
 		$controllerPath = $this->getControllerPath();
 		$loader = Loader::load($controllerPath);
 		if (!$loader) {
@@ -67,19 +69,28 @@ class Router {
 		$controller = new $this->controller();
 		$this->action = '/' . $this->action;
 		$this->type = $request->server['request_method'];
-		$controller->params = $this->getRequestParams($request);
-		
-		$controller->callAction($this->action, $this->type);
-		return;
-		
-
-		ob_start();
-		$action = $this->action;
-		$controller->$action();
-		$body = ob_get_contents();
-		ob_clean();
-		$response->status(200);
-		$response->end($body);
+		$controller->setParams($this->getRequestParams($request));
+		$controller->setLocation($this->location);
+		$result = $controller->callAction($this->action, $this->type);
+		if ($result === false) {
+			$this->pageNotFound($response);
+			return;
+		}
+		$response->header('Content-Type', $controller->responseFormat);
+		$response->status($controller->responseCode);
+		if ($controller->responseFormat === 'application/json') {
+			$response->end(json_encode($controller->_data));
+			return;
+		}
+		if ($controller->responseFormat === 'text/html') {
+			$response->end($controller->_data);
+			return;
+		}
+		if (isset($controller->responseLocation)) {
+			$response->header('Location', $controller->responseLocation);
+			return;
+		}
+		$response->end($result);
 		return;
 	}
      
