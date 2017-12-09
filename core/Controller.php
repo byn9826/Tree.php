@@ -88,24 +88,44 @@ class Controller {
 		$this->_data = $data;
 	}
 	
-	protected function render($params1, $params2 = null) {
-		if ($params2 === null) {
-			$data = $params1;
-			$name = null;
-		} else {
-			$name = $params1;
-			$data = $params2;
-		}
+	protected function render($loc, $data = null) {
 		$this->responseFormat = 'text/html';
-		if ($name === null) {
-			if ($this->_location[0] === null) {
-				$location = Server::$_root . '/app/view/' . $this->_location[1] . '/' . $this->_location[2] . '.php';
+		$location = explode('/', $loc);
+		if ($this->_location[0] === null) {
+			switch(count($location)) {
+				case 1:
+					$file = Server::$_root . '/app/views/' . $this->_location[1] . '/' . $location[0] . '.php';
+					break;
+				case 2:
+					$file = Server::$_root . '/app/views/' . $location[0] . '/' . $location[1] . '.php';
+					break;
+				case 3:
+					$file = Server::$_root . '/app/modules/' . $location[0] . '/views/' . $location[1] . '/' . $location[2] . '.php';
+					break;
+			}
+		} else {
+			switch(count($location)) {
+				case 1:
+					$file = Server::$_root . '/app/modules/' . $this->_location[0] . '/views/' . $this->_location[1] . '/' . $location[0] . '.php';
+					break;
+				case 2:
+					$file = Server::$_root . '/app/modules/' . $this->_location[0] . '/views/' . $location[0] . '/' . $location[1] . '.php';
+					break;
+				case 3:
+					if ($location[0] === '') {
+						$file = Server::$_root . '/app/views/' . $location[1] . '/' . $location[2] . '.php';
+					} else {
+						$file = Server::$_root . '/app/modules/' . $location[0] . '/views/' . $location[1] . '/' . $location[2] . '.php';
+					}
+					break;
 			}
 		}
 		ob_start();
 		ob_implicit_flush(false);
-		extract($data, EXTR_OVERWRITE);
-		require($location);
+		if ($data !== null) {
+			extract($data, EXTR_OVERWRITE);
+		}
+		require($file);
 		$this->_data = ob_get_clean();
 	}
 	
@@ -113,17 +133,40 @@ class Controller {
 		$this->responseCode = 302;
 		$follow = '';
 		if ($params !== null) {
-			$follow .= '?';
 			foreach($params as $key => $param) {
-				$follow .= $key . '=' . $param;
+				$follow .= '&' . $key . '=' . $param;
 			}
+			$follow = '?' . substr($follow, 1, strlen($follow) - 1);
 		}
 		$location = explode('/', $loc);
-		switch(count($location)) {
-			case 1:
-				$this->responseLocation = $location[0] . $follow;
-				break;
+		if ($this->_location[0] === null) {
+			switch(count($location)) {
+				case 1:
+					$this->responseLocation = '/' . $this->_location[1] . '/' . $location[0] . $follow;
+					break;
+				case 2:
+				case 3:
+					$this->responseLocation = '/' . $loc . $follow;
+					break;
+			}
+		} else {
+			switch(count($location)) {
+				case 1:
+					$this->responseLocation = '/' . $this->_location[0] . '/' . $this->_location[1] . '/' . $location[0] . $follow;
+					break;
+				case 2:
+					$this->responseLocation = '/' . $this->_location[0] . '/' . $location[0] . '/' . $location[1] . $follow;
+					break;
+				case 3:
+					if ($location[0] === '') {
+						$this->responseLocation = $loc . $follow;
+					} else {
+						$this->responseLocation = '/' . $loc . $follow;
+					}
+					break;
+			}
 		}
+
 	}
 	
 }

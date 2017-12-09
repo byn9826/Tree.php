@@ -39,10 +39,12 @@ class Router {
 					$this->action = $pathInfo[3];
 					break;
 				case 3:
+					$this->module = null;
 					$this->controller = $pathInfo[1];
 					$this->action = $pathInfo[2];
 					break;
 				case 2:	
+					$this->module = null;
 					$this->controller = $pathInfo[1];
 					$this->action = 'index';
 					break;
@@ -55,18 +57,22 @@ class Router {
 			$this->pageNotFound($response);
 			return;
 		}
-		$this->location = [$this->module, $this->controller, $this->action];
+		$this->location = [$this->module, $this->controller];
 		$controllerPath = $this->getControllerPath();
 		$loader = Loader::load($controllerPath);
 		if (!$loader) {
 			$this->pageNotFound($response);
 			return;
 		}
-		if (!class_exists($this->controller)) {
+		$realClass = $this->module === null ? 
+			'\\' . \Tree\Info\Config::$baseNamespace . '\\Controller\\' : 
+			'\\' . ucfirst($this->module) . '\\Controller\\';
+		$realClass .= $this->controller;
+		if (!class_exists($realClass)) {
 			$this->pageNotFound($response);
 			return;
 		}
-		$controller = new $this->controller();
+		$controller = new $realClass();
 		$this->action = '/' . $this->action;
 		$this->type = $request->server['request_method'];
 		$controller->setParams($this->getRequestParams($request));
@@ -97,8 +103,8 @@ class Router {
   protected function getControllerPath() {
 		$this->controller = ucfirst($this->controller) . 'Controller';
 		$path = Server::$_root . '/app';
-		if ($this->module) {
-			$path .= '/modules/controllers/' . strtolower($this->module);
+		if ($this->module !== null) {
+			$path .= '/modules/' . $this->module;
 		}
 		$path .= '/controllers/' . $this->controller . '.php';
 		return $path;

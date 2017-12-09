@@ -1,9 +1,9 @@
 <!DOCTYPE html>
 <html>
 	<head>
-		<title><?= $name; ?></title>
+		<title></title>
 	</head>
 	<body>
-		Your name is <?= $name; ?>
+		Here we are.
 	</body>
 </html>

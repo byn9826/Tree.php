@@ -1,12 +1,15 @@
 <?php
+
+namespace App\Controller;
 	
-class TestController extends Tree\Core\Controller {
+class TestController extends \Tree\Core\Controller {
 	
 	public function __construct() {
 		
 		$this->get('/index', function() {
-			$this->render([
-				'name' => $this->params('name')
+			$this->render('index', [
+				'name' => $this->params('name'),
+				'id' => $this->params('id')
 			]);
 		});
 		
@@ -23,6 +26,10 @@ class TestController extends Tree\Core\Controller {
 			return 123;
 		});
 		
+		$this->post('/test', function() {
+			$this->render('example/default/index');
+		});
+		
 		$this->put('/test', function() {
 			$this->responseFormat = 'raw';
 			$this->responseCode = '401';
@@ -31,11 +38,11 @@ class TestController extends Tree\Core\Controller {
 		
 		$this->all('/test', function() {
 			$name = $this->params('name');
-			if (isset($name)) {
-				$this->redirect('index', ['name' => $name]);
-			} else {
-				$this->redirect('index');
-			}
+			$this->redirect('example/index', ['name' => $name]);
+		});
+		
+		$this->get('/module', function() {
+			$this->redirect('sample/default/index');
 		});
 		
 	}
