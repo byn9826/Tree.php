@@ -1,6 +1,8 @@
 <?php
 
 namespace App\Controller;
+
+use \App\Model\Testing;
 	
 class TestController extends \Tree\Core\Controller {
 	
@@ -27,7 +29,7 @@ class TestController extends \Tree\Core\Controller {
 		});
 		
 		$this->post('/test', function() {
-			$this->render('example/default/index');
+			$this->render('sample/default/index');
 		});
 		
 		$this->put('/test', function() {
@@ -43,6 +45,13 @@ class TestController extends \Tree\Core\Controller {
 		
 		$this->get('/module', function() {
 			$this->redirect('sample/default/index');
+		});
+		
+		$this->get('/db', function() {
+			$test = Testing::fetchAll(['name' => '123']);
+			$this->return([
+				'data' => $test
+			]);
 		});
 		
 	}

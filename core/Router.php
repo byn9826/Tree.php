@@ -65,7 +65,7 @@ class Router {
 			return;
 		}
 		$realClass = $this->module === null ? 
-			'\\' . \Tree\Info\Config::$baseNamespace . '\\Controller\\' : 
+			'\\' . \Tree\Info\Config::$application['baseNamespace'] . '\\Controller\\' : 
 			'\\' . ucfirst($this->module) . '\\Controller\\';
 		$realClass .= $this->controller;
 		if (!class_exists($realClass)) {
@@ -102,7 +102,7 @@ class Router {
      
   protected function getControllerPath() {
 		$this->controller = ucfirst($this->controller) . 'Controller';
-		$path = Server::$_root . '/app';
+		$path = \Tree\Info\Config::$application['baseFolder'];
 		if ($this->module !== null) {
 			$path .= '/modules/' . $this->module;
 		}

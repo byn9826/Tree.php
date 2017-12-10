@@ -94,28 +94,28 @@ class Controller {
 		if ($this->_location[0] === null) {
 			switch(count($location)) {
 				case 1:
-					$file = Server::$_root . '/app/views/' . $this->_location[1] . '/' . $location[0] . '.php';
+					$file = \Tree\Info\Config::$application['baseFolder'] . '/views/' . $this->_location[1] . '/' . $location[0] . '.php';
 					break;
 				case 2:
-					$file = Server::$_root . '/app/views/' . $location[0] . '/' . $location[1] . '.php';
+					$file = \Tree\Info\Config::$application['baseFolder'] . '/views/' . $location[0] . '/' . $location[1] . '.php';
 					break;
 				case 3:
-					$file = Server::$_root . '/app/modules/' . $location[0] . '/views/' . $location[1] . '/' . $location[2] . '.php';
+					$file = \Tree\Info\Config::$application['baseFolder'] . '/modules/' . $location[0] . '/views/' . $location[1] . '/' . $location[2] . '.php';
 					break;
 			}
 		} else {
 			switch(count($location)) {
 				case 1:
-					$file = Server::$_root . '/app/modules/' . $this->_location[0] . '/views/' . $this->_location[1] . '/' . $location[0] . '.php';
+					$file = \Tree\Info\Config::$application['baseFolder'] . '/modules/' . $this->_location[0] . '/views/' . $this->_location[1] . '/' . $location[0] . '.php';
 					break;
 				case 2:
-					$file = Server::$_root . '/app/modules/' . $this->_location[0] . '/views/' . $location[0] . '/' . $location[1] . '.php';
+					$file = \Tree\Info\Config::$application['baseFolder'] . '/modules/' . $this->_location[0] . '/views/' . $location[0] . '/' . $location[1] . '.php';
 					break;
 				case 3:
 					if ($location[0] === '') {
-						$file = Server::$_root . '/app/views/' . $location[1] . '/' . $location[2] . '.php';
+						$file = \Tree\Info\Config::$application['baseFolder'] . '/views/' . $location[1] . '/' . $location[2] . '.php';
 					} else {
-						$file = Server::$_root . '/app/modules/' . $location[0] . '/views/' . $location[1] . '/' . $location[2] . '.php';
+						$file = \Tree\Info\Config::$application['baseFolder'] . '/modules/' . $location[0] . '/views/' . $location[1] . '/' . $location[2] . '.php';
 					}
 					break;
 			}

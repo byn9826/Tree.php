@@ -17,4 +17,10 @@ class Loader {
 		return true;
   }
 
+	public static function loadModels() {
+		spl_autoload_register(function($class) {
+			require(\Tree\Info\Config::$application['baseFolder'] . '/models/' . substr($class, strrpos($class, '\\') + 1) . '.php');
+		});
+	}
+	
 }
