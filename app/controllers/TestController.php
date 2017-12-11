@@ -6,7 +6,7 @@ use \App\Model\Testing;
 	
 class TestController extends \Tree\Core\Controller {
 	
-	public function __construct() {
+	public function actions() {
 		
 		$this->get('/index', function() {
 			$this->render('index', [
@@ -48,9 +48,9 @@ class TestController extends \Tree\Core\Controller {
 		});
 		
 		$this->get('/db', function() {
-			$test = Testing::fetchAll(['name' => '123']);
+			$test = Testing::fetch()->where(['name' => '123'])->order(['name' => 'ASC'])->select(['name'])->one();
 			$this->return([
-				'data' => $test
+				'data' => $test->name
 			]);
 		});
 		

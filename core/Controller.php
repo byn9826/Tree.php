@@ -19,7 +19,9 @@ class Controller {
 	public $responseCode = 200;
 	public $responseLocation;
 	
-	private function __construct() {}
+	public function __construct() {
+		$this->actions();
+	}
 	
 	public function setLocation($value) {
 		$this->_location = $value;
