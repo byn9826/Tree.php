@@ -48,10 +48,26 @@ class TestController extends \Tree\Core\Controller {
 		});
 		
 		$this->get('/db', function() {
-			$test = Testing::fetch()->where(['name' => '123'])->order(['name' => 'ASC'])->select(['name'])->one();
-			$this->return([
-				'data' => $test->name
-			]);
+			$test = Testing::fetch()->where(['id' => 1])->order(['name' => 'ASC'])->select(['name', 'count'])->one();
+			if (isset($test)) {
+				$test->set('count', $test->get('count') + 1);
+				$result = $test->save();
+				$testing = new Testing();
+				$testing->set('name', 'Current count: ' . $test->get('count'));
+				$create = $testing->save();
+				$deleted_id = $create->insert_id;
+				$testing->delete();
+				$this->return([
+					'count' => $test->get('count'),
+					'data' => $test->get('name'),
+					'result' => $result->insert_id,
+					'create' => $deleted_id
+				]);
+			} else {
+				$this->return([
+					'result' => 'no result'
+				]);
+			}
 		});
 		
 	}

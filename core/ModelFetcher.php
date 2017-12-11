@@ -6,17 +6,19 @@ class ModelFetcher {
 	
 	private $_tableName;
 	private $_className;
+	private $_primaryKey;
 	private $_selectQuery = '';
 	private $_whereQuery = '';
 	private $_orderQuery = '';
 	
-	public function __construct($table, $class) {
+	public function __construct($table, $key, $class) {
 		$this->_tableName = $table;
+		$this->_primaryKey = $key;
 		$this->_className = $class;
 	}
 	
 	public function select($conditions) {
-		$this->_selectQuery = $conditions;
+		$this->_selectQuery = array_unique(array_merge($conditions, $this->_primaryKey));
 		return $this;
 	}
 	
@@ -32,28 +34,30 @@ class ModelFetcher {
 	
 	public function one() {
 		$query = $this->buildQuery() . ' LIMIT 1';
-		$_db = \Tree\Core\Mysql::getInstance();
-		$result = $_db->query($query)[0];
 		$instance = new $this->_className();
-		foreach($result as $k => $s) {
-			$instance->$k = $s;
+		$_db = \Tree\Core\Mysql::getInstance();
+		$result = $_db->query($query);
+		if (!empty($result)) {
+			$instance->_dataStorage = $result[0];
+			$instance->_mode = 'old';
+			return $instance;
 		}
-		return $instance;
 	}
 	
 	public function all() {
 		$query = $this->buildQuery();
+		$models = [];
 		$_db = \Tree\Core\Mysql::getInstance();
 		$results = $_db->query($query);
-		$data = [];
-		foreach($results as $result) {
-			$instance = new $this->_className();
-			foreach($result as $k => $s) {
-				$instance->$k = $s;
+		if (!empty($result)) {
+			foreach($results as $result) {
+				$instance = new $this->_className();
+				$instance->_dataStorage = $result;
+				$instance->_mode = 'old';
+				array_push($models, $instance);
 			}
-			array_push($data, $instance);
+			return $models;
 		}
-		return $data;
 	}
 	
 	private function buildQuery() {
@@ -62,6 +66,7 @@ class ModelFetcher {
 			'SELECT ' . implode(', ', $this->_selectQuery) . ' FROM ' . $this->_tableName;
 		if ($this->_whereQuery !== '') {
 			$query .= ' WHERE';
+			$params = [];
 			foreach($this->_whereQuery as $key => $value) {
 				$query .= $value === null ? 
 					//*Temporarily use addslashes for Mysql Escape
