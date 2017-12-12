@@ -1,0 +1,12 @@
+{
+    "name": "byn9826/tree.php",
+    "require": {
+        "robmorgan/phinx": "^0.9.1"
+    },
+    "authors": [
+        {
+            "name": "byn9826",
+            "email": "byn9826@gmail.com"
+        }
+    ]
+}

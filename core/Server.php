@@ -11,9 +11,7 @@ class Server {
 	}
 
   public function run() {
-		self::$_core->set([
-			'worker_num' => 2
-		]);
+		self::$_core->set(\Tree\Info\Config::$server);
 		self::$_core->on('request', function($request, $response) {
 			Loader::loadModels();
 			Router::getInstance()->dispatch($request, $response);

@@ -18,7 +18,10 @@ class ModelFetcher {
 	}
 	
 	public function select($conditions) {
-		$this->_selectQuery = array_unique(array_merge($conditions, $this->_primaryKey));
+		if(!in_array($this->_primaryKey, $conditions)) {
+			array_push($conditions, $this->_primaryKey);
+		}
+		$this->_selectQuery = $conditions;
 		return $this;
 	}
 	
@@ -33,10 +36,9 @@ class ModelFetcher {
 	}
 	
 	public function one() {
-		$query = $this->buildQuery() . ' LIMIT 1';
+		$query = $this->_buildQuery() . ' LIMIT 1';
 		$instance = new $this->_className();
-		$_db = \Tree\Core\Mysql::getInstance();
-		$result = $_db->query($query);
+		$result = $this->_executeQuery($query);
 		if (!empty($result)) {
 			$instance->_dataStorage = $result[0];
 			$instance->_mode = 'old';
@@ -45,10 +47,9 @@ class ModelFetcher {
 	}
 	
 	public function all() {
-		$query = $this->buildQuery();
+		$query = $this->_buildQuery();
 		$models = [];
-		$_db = \Tree\Core\Mysql::getInstance();
-		$results = $_db->query($query);
+		$result = $this->_executeQuery($query);
 		if (!empty($result)) {
 			foreach($results as $result) {
 				$instance = new $this->_className();
@@ -60,7 +61,13 @@ class ModelFetcher {
 		}
 	}
 	
-	private function buildQuery() {
+	private function _executeQuery($query) {
+		$_db = \Tree\Core\Mysql::getInstance();
+		$query = $_db->escape($query);
+		return $_db->query($query);
+	}
+	
+	private function _buildQuery() {
 		$query = $this->_selectQuery === '' ?
 			'SELECT * FROM ' . $this->_tableName :
 			'SELECT ' . implode(', ', $this->_selectQuery) . ' FROM ' . $this->_tableName;
@@ -69,8 +76,7 @@ class ModelFetcher {
 			$params = [];
 			foreach($this->_whereQuery as $key => $value) {
 				$query .= $value === null ? 
-					//*Temporarily use addslashes for Mysql Escape
-					' ' . $key . ' IS NULL' : ' ' . $key . ' = ' . addslashes($value);
+					' ' . $key . ' IS NULL' : ' ' . $key . ' = ' . $value;
 			}
 		}
 		if ($this->_orderQuery !== '') {
